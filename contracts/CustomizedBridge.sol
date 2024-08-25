@@ -30,7 +30,7 @@ contract CustomizedBridge {
         if (nonceUsed[nonce]) revert InvalidNonce();
 
         address bridgeUser = msg.sender;
-        if (!isValidSignature(nonce, bridgeUser, shouldPay, signature)) revert InvalidSignature();
+        if (!isValidSignature(nonce, bridgeUser, bridgeAmount, shouldPay, signature)) revert InvalidSignature();
 
         IERC20(bridgeToken).safeTransferFrom(bridgeUser, address(this), bridgeAmount);
 
@@ -48,8 +48,8 @@ contract CustomizedBridge {
         emit BridgeOut(bridgeUser, bridgeToken, bridgeAmount, bridgeFee);
     }
 
-    function isValidSignature(uint256 nonce, address bridgeUser, bool shouldPay, bytes calldata _signature) internal view returns(bool) {
-        bytes memory data = abi.encode(nonce, bridgeUser, shouldPay);
+    function isValidSignature(uint256 nonce, address bridgeUser, uint256 bridgeAmount, bool shouldPay, bytes calldata _signature) internal view returns(bool) {
+        bytes memory data = abi.encode(nonce, bridgeUser, bridgeAmount, shouldPay);
         bytes32 hash = keccak256(data);
         address recoveredAddress = ECDSA.recover(hash, _signature);
         return (recoveredAddress == signer);
